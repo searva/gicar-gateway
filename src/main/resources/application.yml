@@ -1,27 +1,35 @@
-server:
-  port: 8080
-
-zuul:
-  routes:
-    users:
-      path: /myusers/**
-      url: http://scooterlabs.com/echo/
-      
 ribbon.eureka.enabled: false
+
+management.security.enabled: false
 
 security:
   basic:
     enabled: false
   sessions: stateless
-
-oauth:
-  clientId: 887174581528-jup6nprs4kv7qdnjmk0i3mh3b38ui4qn.apps.googleusercontent.com
-  clientSecret: V3c8pP9_5pmRhVfP2oy4DNdP
-  checkTokenUrl: https://www.googleapis.com/oauth2/v3/tokeninfo?access_token={accessToken}
-  userInfoUrl: https://www.googleapis.com/userinfo/v2/me
-  signingKey: MaYzkSjmkzPC57L
   
+---
+spring:
+    profiles: loc
+zuul:
+  routes:
+    traint:
+      path: /api/tramits/**
+      url: http://localhost:8700/api/tramits/
       
-    
-    
-    
+---
+spring:
+    profiles: dev
+zuul:
+  routes:
+    traint:
+      path: /api/tramits/**
+      url: http://localhost:8082/gsittraint-service/api/tramits/
+      
+---
+spring:
+    profiles: conso
+zuul:
+  routes:
+    traint:
+      path: /api/tramits/**
+      url: http://ctti12/gsittraint-service/api/tramits/

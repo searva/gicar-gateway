@@ -1,62 +1,47 @@
 package cat.gencat.gsit.apis.edge;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
-import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.web.WebApplicationInitializer;
 
-import cat.gencat.gsit.apis.edge.oauth.AccessTokenValidator;
-import cat.gencat.gsit.apis.edge.oauth.GoogleAccessTokenValidator;
-import cat.gencat.gsit.apis.edge.oauth.GoogleTokenServices;
-import cat.gencat.gsit.apis.edge.oauth.OauthAccessTokenExtractor;
-import cat.gencat.gsit.apis.edge.oauth.OauthProperties;
-import cat.gencat.gsit.apis.edge.oauth.TokenExtractor;
 import cat.gencat.gsit.apis.edge.oauth.TokenPreFilter;
 
 @SpringBootApplication
 @EnableZuulProxy
-public class PublicGatewayApplication {
-
+@EnableAutoConfiguration
+public class PublicGatewayApplication extends SpringBootServletInitializer implements WebApplicationInitializer{
+	private static final String ENTORN = "entorn";
 	@Bean
-	public TokenPreFilter tokenFilter(TokenExtractor tokenExtractor, ResourceServerTokenServices tokenService, JwtAccessTokenConverter tokenEnhancer) {
-		return new TokenPreFilter(tokenExtractor, tokenService, tokenEnhancer);
+	public TokenPreFilter tokenFilter() {
+		return new TokenPreFilter();
 	}
 	
-	@Bean
-	public TokenExtractor tokenExtractor() {
-		return new OauthAccessTokenExtractor();
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
+		return application.sources(PublicGatewayApplication.class);
 	}
 	
-	@Bean
-	public AccessTokenValidator accessTokenValidator(OauthProperties oauthProperties) {
-		GoogleAccessTokenValidator validator = new GoogleAccessTokenValidator();
-		validator.setClientId(oauthProperties.getClientId());
-		validator.setCheckTokenUrl(oauthProperties.getCheckTokenUrl());
-		return validator;
-	}
-	
-	@Bean
-	public ResourceServerTokenServices resourceServerTokenServices(OauthProperties oauthProperties,AccessTokenValidator tokenValidator) {
-		GoogleTokenServices service = new GoogleTokenServices(tokenValidator);
-		service.setUserInfoUrl(oauthProperties.getUserInfoUrl());
-		return service;
-	}
-
-	@Bean
-	public OauthProperties oauthProperties() {
-		return new OauthProperties();
-	}
-	
-	@Bean
-	public JwtAccessTokenConverter accessTokenConverter(OauthProperties oauthProperties) {
-		JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-		converter.setSigningKey(oauthProperties.getSigningKey());
-		return converter;
-	}
 	
 	public static void main(String[] args) {
 		SpringApplication.run(PublicGatewayApplication.class, args);
 	}
+	
+	@Override
+	public void onStartup(final ServletContext servletContext) throws ServletException {
+		String entorn = System.getProperty(ENTORN);
+		if (entorn == null) {
+			entorn = "loc";
+		}
+		servletContext.setInitParameter("spring.profiles.active", entorn);
+		super.onStartup(servletContext);
+	}
+
 }
