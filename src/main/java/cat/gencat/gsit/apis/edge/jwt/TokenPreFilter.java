@@ -1,4 +1,4 @@
-package cat.gencat.gsit.apis.edge.oauth;
+package cat.gencat.gsit.apis.edge.jwt;
 
 
 
@@ -10,12 +10,15 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 
 import com.google.common.io.BaseEncoding;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 
+import cat.gencat.gsit.apis.edge.gicar.GicarUser;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -50,15 +53,11 @@ public class TokenPreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
 		HttpServletRequest request = ctx.getRequest();
 		
-		Set<String> roles = new HashSet<>();
-		String gicar_id = "00000000T";
-		roles.add("USER");
-		User user = new User(gicar_id);
-		user.setRoles(roles);
+		PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 		
+		GicarUser user = (GicarUser)token.getPrincipal();
 
 		try {
-			LOG.info("Authentication: " + gicar_id);
 			
 			String jwtToken = this.encode(user);
 			
@@ -66,14 +65,14 @@ public class TokenPreFilter extends ZuulFilter {
 			
 			ctx.addZuulRequestHeader("Authorization", "Bearer " + jwtToken);
 			
-		}catch(InvalidTokenException | TokenCreationException e) {
+		}catch(Exception e) {
 			this.setFailedRequest(e.getMessage(), 403);
 		}
 		
 		return null;
     }
     
-    public String encode(User user) throws TokenCreationException {
+    public String encode(GicarUser user)  {
         
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         
@@ -85,11 +84,11 @@ public class TokenPreFilter extends ZuulFilter {
         
         JwtBuilder builder = Jwts.builder()
                 .setIssuer("gicar")
-                .setSubject(user.getId())
+                .setSubject(user.getUsername())
                 .setIssuedAt(now)
                 .setExpiration(exp)
-                .claim("role", "ROLE_USER")
-                .claim("agentId", 103)
+                .claim("role", user.getAuthorities().toArray(new GrantedAuthority[1])[0])
+                .claim("agentId", user.getId())
                 .signWith(signatureAlgorithm, SECRET);
         
        return builder.compact(); 

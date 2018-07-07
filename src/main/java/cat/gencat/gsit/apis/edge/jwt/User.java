@@ -1,4 +1,4 @@
-package cat.gencat.gsit.apis.edge.oauth;
+package cat.gencat.gsit.apis.edge.jwt;
 
 import java.util.Set;
 

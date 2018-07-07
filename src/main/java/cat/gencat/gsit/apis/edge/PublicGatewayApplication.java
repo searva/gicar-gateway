@@ -10,9 +10,11 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.web.WebApplicationInitializer;
 
-import cat.gencat.gsit.apis.edge.oauth.TokenPreFilter;
+import cat.gencat.gsit.apis.edge.jwt.TokenPreFilter;
 
 @SpringBootApplication
 @EnableZuulProxy
@@ -43,5 +45,7 @@ public class PublicGatewayApplication extends SpringBootServletInitializer imple
 		servletContext.setInitParameter("spring.profiles.active", entorn);
 		super.onStartup(servletContext);
 	}
+	
+
 
 }
