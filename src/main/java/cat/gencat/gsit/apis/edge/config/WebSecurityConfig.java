@@ -12,13 +12,8 @@
 package cat.gencat.gsit.apis.edge.config;
 
 import java.util.Collections;
-import java.util.regex.Pattern;
 
 import org.springframework.boot.autoconfigure.security.Http401AuthenticationEntryPoint;
-import org.springframework.cache.CacheManager;
-import org.springframework.cache.annotation.EnableCaching;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,11 +38,7 @@ import cat.gencat.gsit.apis.edge.gicar.AuthorizationUserDetailsService;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	  public static final String REALM_NAME = "MyRealm";
-	    public static final String API_KEY_PARAM = "apikey";
-	    public static final Pattern AUTHORIZATION_HEADER_PATTERN = Pattern.compile(
-	        String.format("%s %s=\"(\\S+)\"", REALM_NAME, API_KEY_PARAM)
-	    );
+	
 
 	    @Override
 	    protected void configure(HttpSecurity http) throws Exception {
@@ -95,7 +86,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	    @Bean
 	    public AuthenticationEntryPoint authenticationEntryPoint() {
-	        return new Http401AuthenticationEntryPoint(REALM_NAME);
+	        return new Http401AuthenticationEntryPoint("GICAR");
 	    }
 
 }

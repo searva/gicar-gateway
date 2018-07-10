@@ -19,7 +19,7 @@ import cat.gencat.gsit.apis.edge.jwt.TokenPreFilter;
 @SpringBootApplication
 @EnableZuulProxy
 @EnableAutoConfiguration
-public class PublicGatewayApplication extends SpringBootServletInitializer implements WebApplicationInitializer{
+public class GicarGatewayApplication extends SpringBootServletInitializer implements WebApplicationInitializer{
 	private static final String ENTORN = "entorn";
 	@Bean
 	public TokenPreFilter tokenFilter() {
@@ -28,12 +28,12 @@ public class PublicGatewayApplication extends SpringBootServletInitializer imple
 	
 	@Override
 	protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
-		return application.sources(PublicGatewayApplication.class);
+		return application.sources(GicarGatewayApplication.class);
 	}
 	
 	
 	public static void main(String[] args) {
-		SpringApplication.run(PublicGatewayApplication.class, args);
+		SpringApplication.run(GicarGatewayApplication.class, args);
 	}
 	
 	@Override

@@ -3,10 +3,6 @@ package cat.gencat.gsit.apis.edge.jwt;
 
 
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,13 +21,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 
 public class TokenPreFilter extends ZuulFilter {
 	
-	final String SECRET = BaseEncoding.base64().encode("0fK9jWwWcHdi".getBytes());
+	private final String secret = BaseEncoding.base64().encode("0fK9jWwWcHdi".getBytes());
 
-	private final Logger LOG = LoggerFactory.getLogger(TokenPreFilter.class);
-	
-	
-	public TokenPreFilter() {
-	}
+	private final Logger log = LoggerFactory.getLogger(TokenPreFilter.class);
 	
 	@Override
 	public boolean shouldFilter() {
@@ -51,7 +43,6 @@ public class TokenPreFilter extends ZuulFilter {
     @Override
     public Object run() {
         RequestContext ctx = RequestContext.getCurrentContext();
-		HttpServletRequest request = ctx.getRequest();
 		
 		PreAuthenticatedAuthenticationToken token = (PreAuthenticatedAuthenticationToken)SecurityContextHolder.getContext().getAuthentication();
 		
@@ -61,9 +52,11 @@ public class TokenPreFilter extends ZuulFilter {
 			
 			String jwtToken = this.encode(user);
 			
-			LOG.info("jwt: " + jwtToken);
+			if (log.isInfoEnabled()) {
+				log.info(String.format("jwt = %s", jwtToken));
+			}
 			
-			ctx.addZuulRequestHeader("Authorization", "Bearer " + jwtToken);
+			ctx.addZuulRequestHeader("X-Authorization", String.format("Bearer %s", jwtToken));
 			
 		}catch(Exception e) {
 			this.setFailedRequest(e.getMessage(), 403);
@@ -89,14 +82,14 @@ public class TokenPreFilter extends ZuulFilter {
                 .setExpiration(exp)
                 .claim("role", user.getAuthorities().toArray(new GrantedAuthority[1])[0])
                 .claim("agentId", user.getId())
-                .signWith(signatureAlgorithm, SECRET);
+                .signWith(signatureAlgorithm, secret);
         
        return builder.compact(); 
      
     }
     
     private void setFailedRequest(String body, int code) {
-        LOG.debug("Reporting error ({}): {}", code, body);
+        log.debug("Reporting error ({}): {}", code, body);
         RequestContext ctx = RequestContext.getCurrentContext();
         ctx.setResponseStatusCode(code);
         if (ctx.getResponseBody() == null) {

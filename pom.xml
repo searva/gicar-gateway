@@ -9,8 +9,8 @@
 	<version>1.0.0</version>
 	<packaging>war</packaging>
 
-	<name>public-gateway</name>
-	<description>API Gateway para el acceso público a las apis de GSTI</description>
+	<name>gicar-gateway</name>
+	<description>API Gateway para el acceso privado (gicar) a las apis de GSTI</description>
 
 
 	<properties>
@@ -69,9 +69,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-cache</artifactId>
 		</dependency>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-cache</artifactId>
+			<artifactId>spring-boot-starter-jdbc</artifactId>
 		</dependency>
 	</dependencies>
 
